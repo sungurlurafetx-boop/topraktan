@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3d7a2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Topraktan">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-family:system-ui,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Topraktan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Düzen: tek sütun telefon listesi. Üstte günün özeti, altında bitki kartları; her kartta ekimden hasada ilerleme çizgisi. */
+:root {
+  --bg: #eceee3;
+  --surface: #f7f8f1;
+  --fg: #232a1c;
+  --muted: #65705a;
+  --line: #d3d8c4;
+  --leaf: #3d7a2c;
+  --leaf-ink: #ffffff;
+  --soil: #6b4a2f;
+  --warn: #a84a14;
+  --warn-bg: #f5e1cf;
+  --ok-bg: #dcebd0;
+  --star: #d99a0b;
+  --display: 'Bricolage Grotesque', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1712;
+    --surface: #25211a;
+    --fg: #ece8dc;
+    --muted: #a59f8d;
+    --line: #3a3429;
+    --leaf: #8cc66b;
+    --leaf-ink: #14200d;
+    --soil: #c49a6c;
+    --warn: #f0a06a;
+    --warn-bg: #432a19;
+    --ok-bg: #2b3a20;
+    --star: #f2c24f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1a1712;
+  --surface: #25211a;
+  --fg: #ece8dc;
+  --muted: #a59f8d;
+  --line: #3a3429;
+  --leaf: #8cc66b;
+  --leaf-ink: #14200d;
+  --soil: #c49a6c;
+  --warn: #f0a06a;
+  --warn-bg: #432a19;
+  --ok-bg: #2b3a20;
+    --star: #f2c24f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
+
+.app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; }
+.logo-soil { fill: var(--soil); }
+.logo-stem { stroke: var(--bg); }
+.logo-leaf { fill: var(--leaf); }
+.brand h1 { font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1; letter-spacing: -0.02em; margin: 0; }
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-weight: 500;
+  min-height: 40px;
+}
+.btn.primary { background: var(--leaf); border-color: var(--leaf); color: var(--leaf-ink); font-weight: 700; }
+.btn.small { min-height: 36px; padding: 6px 12px; font-size: 14px; }
+.btn.danger { color: var(--warn); }
+
+.today { display: flex; flex-direction: column; gap: 2px; }
+.today .date { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+.today .line { font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.2; text-wrap: balance; margin: 0; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel h2 { font-family: var(--display); font-size: 18px; margin: 0; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 13px; color: var(--muted); }
+.field select, .field input {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px; width: 100%;
+}
+.panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+
+.list { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.card-head { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 14px 16px 12px; }
+.name-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pname { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+.pday { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ex { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; margin-left: 8px; font-family: var(--body); font-weight: 500; vertical-align: 3px; }
+
+.track { position: relative; height: 8px; border-radius: 4px; background: var(--line); }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--leaf); }
+.tick { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--soil); border-radius: 1px; transform: translateX(-1px); }
+
+.next { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 14px; padding: 5px 10px; border-radius: 8px; align-self: flex-start; background: var(--bg); }
+.next.warn { background: var(--warn-bg); color: var(--warn); font-weight: 700; }
+.next.ok { background: var(--ok-bg); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+
+.card-actions { display: flex; gap: 8px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+.details { border-top: 1px solid var(--line); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.steps li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.steps .sname { font-weight: 500; }
+.steps .sdate { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+.steps li.done .sname { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.meta { font-size: 13px; color: var(--muted); margin: 0; }
+
+.empty { text-align: center; padding: 32px 16px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); }
+.empty strong { display: block; font-family: var(--display); font-size: 18px; color: var(--fg); margin-bottom: 4px; }
+.foot { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+
+/* Görsel katman: bitki ikonları, aşama etiketi, ilerleme çizgisindeki filiz */
+.head-top { display: flex; align-items: center; gap: 12px; }
+.tile { flex: none; width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; position: relative; }
+.tile svg { width: 40px; height: 40px; display: block; }
+.tile .drop { position: absolute; right: -6px; top: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--warn); display: grid; place-items: center; border: 2px solid var(--surface); }
+.tile .drop svg { width: 12px; height: 12px; }
+.ptext { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.stage { font-size: 13px; color: var(--muted); }
+.track { margin-block: 6px; }
+.sprout { position: absolute; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); transition: left .4s ease; }
+.sprout svg { width: 100%; height: 100%; display: block; }
+.sprout .bg { fill: var(--leaf); }
+.sprout .lf { fill: var(--leaf-ink); }
+.field .lbl { font-size: 13px; color: var(--muted); }
+.picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pick { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px 6px; border: 2px solid transparent; border-radius: 14px; background: var(--bg); font-size: 12px; min-width: 0; }
+.pick span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick .tile { width: 44px; height: 44px; border-radius: 12px; }
+.pick .tile svg { width: 32px; height: 32px; }
+.pick[aria-checked="true"] { border-color: var(--leaf); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .sprout { transition: none; } }
+
+/* Açıklayıcı yazı: varsayılan kapalı, listenin altında */
+.why { border-top: 1px solid var(--line); }
+.why summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; cursor: pointer; list-style: none; font-family: var(--display); font-weight: 600; font-size: 16px; }
+.why summary::-webkit-details-marker { display: none; }
+.why summary::after { content: "+"; font-size: 22px; line-height: 1; color: var(--leaf); }
+.why[open] summary::after { content: "\2212"; }
+.why-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 8px; max-width: 65ch; }
+.why-body p { margin: 0; color: var(--muted); }
+
+/* Çiftçi adı, yıldızlar, lig */
+.farmer-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; min-height: 36px; font-weight: 500; max-width: 100%; }
+.farmer-chip .cname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cstars { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.star { width: 14px; height: 14px; fill: none; stroke: var(--star); stroke-width: 1.6; stroke-linejoin: round; flex: none; }
+.star.on { fill: var(--star); }
+.stars { display: inline-flex; gap: 1px; vertical-align: -2px; margin-left: 4px; }
+.league { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; }
+.league h2 { font-family: var(--display); font-size: 20px; margin: 0; }
+.league ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lg-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.lg-row.me { border-color: var(--leaf); }
+.lg-rank { width: 26px; height: 26px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; flex: none; }
+.lg-row:first-child .lg-rank { background: var(--star); color: #2a1d00; }
+.lg-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.lg-score { display: flex; align-items: center; gap: 4px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lg-score .star { width: 16px; height: 16px; }
+.lg-score small { font-weight: 400; color: var(--muted); margin-left: 6px; }
+.lg-empty { color: var(--muted); padding: 8px 0; }
+
+/* Arkadaş kodları */
+.share { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.share h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+.share .step { margin: 4px 0 0; font-size: 16px; }
+.code-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.code-row input { flex: 1 1 180px; min-width: 0; min-height: 48px; font-size: 16px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.code-row .btn { min-height: 48px; font-size: 16px; min-width: 96px; }
+.lg-x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); font-size: 20px; line-height: 1; color: var(--muted); }
+.lg-row { font-size: 16px; }
+
+/* Tam ekran hasat kutlaması: bilerek tek görünümlü */
+.celebrate { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; overflow-y: auto; color: #f6f3e4; background: radial-gradient(circle at 50% 28%, #3f6326 0%, #1f2f14 55%, #121a0b 100%); padding: max(24px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+.celebrate canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cel-card { position: relative; z-index: 1; max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.cel-tile { width: 120px; height: 120px; border-radius: 32px; display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(242, 194, 79, .35), 0 20px 60px rgba(0, 0, 0, .4); animation: pop .7s cubic-bezier(.2, 1.4, .4, 1) both; }
+.cel-tile svg { width: 84px; height: 84px; display: block; }
+.cel-kicker { margin: 10px 0 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #f2c24f; font-weight: 700; }
+.celebrate h2 { font-family: var(--display); font-weight: 700; font-size: clamp(32px, 9vw, 46px); line-height: 1.08; margin: 0; text-wrap: balance; overflow-wrap: anywhere; }
+.cel-stars { display: flex; gap: 6px; margin: 6px 0 2px; }
+.cel-stars .star { width: 44px; height: 44px; stroke: #f2c24f; stroke-width: 1.4; animation: pop .5s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: calc(var(--i) * .18s + .5s); }
+.cel-stars .star.on { fill: #f2c24f; }
+.cel-label { margin: 0; font-family: var(--display); font-weight: 600; font-size: 22px; }
+.cel-line { margin: 0; color: #dfe6cf; }
+.cel-btn { margin-top: 14px; background: #f2c24f; border-color: #f2c24f; color: #2a1d00; font-weight: 700; min-width: 160px; }
+@keyframes pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .cel-tile, .cel-stars .star { animation: none; } }
+</style>
+
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true">
+        <circle class="logo-soil" cx="14" cy="14" r="14"/>
+        <path class="logo-stem" d="M14 22V13" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path class="logo-leaf" d="M14 13c0-4 2.5-6.5 6.5-6.5 0 4-2.2 6.5-6.5 6.5z"/>
+        <path class="logo-leaf" opacity=".75" d="M14 16c0-3-2-4.6-5.2-4.6 0 3 1.6 4.6 5.2 4.6z"/>
+      </svg>
+      <h1>Topraktan</h1>
+    </div>
+    <button class="btn primary" id="toggle-add" type="button" aria-expanded="false" aria-controls="add-panel">Bitki ekle</button>
+  </header>
+
+  <section class="panel" id="farmer-panel" hidden>
+    <h2>Çiftçi adın</h2>
+    <div class="field">
+      <label for="farmer-input">Arkadaşların seni bu adla görecek</label>
+      <input id="farmer-input" type="text" maxlength="20" autocomplete="nickname" placeholder="Örn. Ayşe">
+    </div>
+    <div class="panel-actions">
+      <button class="btn primary" id="farmer-save" type="button">Kaydet</button>
+      <button class="btn" id="farmer-cancel" type="button" hidden>Vazgeç</button>
+    </div>
+  </section>
+
+  <button class="farmer-chip" id="farmer-chip" type="button" title="Çiftçi adını değiştir" hidden></button>
+
+  <section class="today" aria-live="polite">
+    <span class="date" id="today-date"></span>
+    <p class="line" id="today-line"></p>
+  </section>
+
+  <section class="panel" id="add-panel" hidden>
+    <h2>Yeni ekim</h2>
+    <div class="field">
+      <span class="lbl" id="pick-label">Ne ektin?</span>
+      <div class="picker" id="picker" role="radiogroup" aria-labelledby="pick-label"></div>
+    </div>
+    <div class="field">
+      <label for="sow-date">Ekim tarihi</label>
+      <input type="date" id="sow-date">
+    </div>
+    <p class="hint" id="plant-hint"></p>
+    <div class="panel-actions">
+      <button class="btn primary" id="add-confirm" type="button">Takvime ekle</button>
+      <button class="btn" id="add-cancel" type="button">Vazgeç</button>
+    </div>
+  </section>
+
+  <section class="list" id="list" aria-label="Bitkilerim"></section>
+
+  <section class="league" aria-label="Çiftçiler Ligi">
+    <h2>Çiftçiler Ligi</h2>
+    <ol id="league-list"></ol>
+    <div class="share">
+      <h3>Arkadaşlarınla yarış</h3>
+      <p class="step"><b>1.</b> Puan kodunu kopyala ve arkadaşına gönder.</p>
+      <div class="code-row">
+        <input id="my-code" type="text" readonly aria-label="Puan kodum">
+        <button class="btn primary" id="copy-code" type="button">Kopyala</button>
+      </div>
+      <p class="step"><b>2.</b> Arkadaşının kodunu buraya yapıştır.</p>
+      <div class="code-row">
+        <input id="friend-code" type="text" placeholder="Arkadaşının kodu" aria-label="Arkadaşının kodu" autocomplete="off">
+        <button class="btn primary" id="add-friend" type="button">Ekle</button>
+      </div>
+      <p class="hint" id="share-msg" aria-live="polite"></p>
+    </div>
+    <p class="hint">Sulamayı unutmazsan daha çok yıldız kazanırsın.</p>
+  </section>
+
+  <details class="why">
+    <summary>Neden toprakla uğraşmalı?</summary>
+    <div class="why-body">
+      <p>Toprakla uğraşmak, çocuğa sabrı ve emeğin karşılığını öğretir. Bir tohumu ekip her gün başında beklemek, her şeyin hemen olmadığını gösterir. Filizin topraktan çıktığını gören çocuk, yaptığı işin bir sonucu olduğunu kendi gözüyle anlar. Üstelik bu, kimsenin anlatmasına gerek kalmadan olur. Toprağın kirini sevmeyi, bir canlının ihtiyaçlarını düşünmeyi ve doğanın kendi hızında ilerlediğini kabul etmeyi de bu süreçte öğrenir.</p>
+      <p>Sorumluluk duygusu da tam burada başlar. Sulamayı unuttuğunda bitkinin solduğunu görmek, hiçbir uyarıdan daha etkilidir. Çocuk, bir canlının kendisine bağlı olduğunu fark eder ve bunu bir yük olarak değil, bir görev olarak sahiplenir. Büyüyen bitki ona gurur verir, hasat ise emeğin tadını. Topraktan'ın amacı da bu: çocuğa ve büyüğe, ekmeyi, beklemeyi ve emeğin karşılığını almayı hatırlatmak.</p>
+    </div>
+  </details>
+
+  <p class="foot">Süreler ortalama değerlerdir; çeşide, iklime ve mevsime göre birkaç hafta oynayabilir. Kayıtlar yalnızca bu telefonda saklanır.</p>
+</main>
+
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="cel-title" hidden>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="cel-card">
+    <div class="cel-tile" id="cel-tile"></div>
+    <p class="cel-kicker" id="cel-kicker"></p>
+    <h2 id="cel-title"></h2>
+    <div class="cel-stars" id="cel-stars" role="img"></div>
+    <p class="cel-label" id="cel-label"></p>
+    <p class="cel-line" id="cel-score"></p>
+    <p class="cel-line" id="cel-rank"></p>
+    <button class="btn cel-btn" id="cel-close" type="button">Devam</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DAY = 864e5;
+  // g: çimlenme, t: fidan dikme (null: doğrudan toprağa ekilir), h: ilk hasat (ekimden itibaren gün), w: sulama aralığı (gün)
+  var PLANTS = {
+    domates:   { n: 'Domates',   g: 7,  t: 45,   h: 90,  w: 2 },
+    biber:     { n: 'Biber',     g: 10, t: 50,   h: 100, w: 2 },
+    patlican:  { n: 'Patlıcan',  g: 10, t: 55,   h: 110, w: 2 },
+    feslegen:  { n: 'Fesleğen',  g: 5,  t: 30,   h: 55,  w: 2 },
+    marul:     { n: 'Marul',     g: 5,  t: 25,   h: 50,  w: 2 },
+    salatalik: { n: 'Salatalık', g: 5,  t: 25,   h: 55,  w: 2 },
+    kabak:     { n: 'Kabak',     g: 6,  t: 21,   h: 55,  w: 3 },
+    maydanoz:  { n: 'Maydanoz',  g: 14, t: 40,   h: 70,  w: 3 },
+    nane:      { n: 'Nane',      g: 14, t: 40,   h: 70,  w: 2 },
+    kekik:     { n: 'Kekik',     g: 14, t: 60,   h: 90,  w: 4 },
+    roka:      { n: 'Roka',      g: 4,  t: null, h: 35,  w: 2 },
+    turp:      { n: 'Turp',      g: 4,  t: null, h: 30,  w: 2 },
+    ispanak:   { n: 'Ispanak',   g: 7,  t: null, h: 45,  w: 3 },
+    dereotu:   { n: 'Dereotu',   g: 10, t: null, h: 45,  w: 3 },
+    fasulye:   { n: 'Fasulye',   g: 7,  t: null, h: 60,  w: 3 },
+    havuc:     { n: 'Havuç',     g: 14, t: null, h: 80,  w: 3 }
+  };
+  var ICONS = {
+    domates: { bg: '#fbe0dc', svg: `<circle cx="24" cy="27" r="14" fill="#d9442f"/><ellipse cx="18" cy="21" rx="4" ry="2.5" fill="#fff" opacity=".35" transform="rotate(-30 18 21)"/><path d="M24 14c-2 2-6 2-8 1 2 3 4 4 8 4s6-1 8-4c-2 1-6 1-8-1z" fill="#3f8a34"/><path d="M24 14v-4" stroke="#3f8a34" stroke-width="2" stroke-linecap="round"/>` },
+    biber: { bg: '#f9e6c8', svg: `<path d="M18 16c-4 6-4 16 2 24 2 3 6 2 7-1 3-7 3-15-1-22z" fill="#d83a2a"/><path d="M20 16c1-3 7-3 8 0 1 2-9 2-8 0z" fill="#3f8a34"/><path d="M24 14c0-3 2-5 5-6" stroke="#3f8a34" stroke-width="2.5" fill="none" stroke-linecap="round"/>` },
+    patlican: { bg: '#e6dff3', svg: `<path d="M20 14c-6 4-8 14-4 22 2 4 8 5 12 1 6-6 6-16 2-23z" fill="#6a3a8c"/><path d="M22 18c-3 4-4 10-2 14" stroke="#fff" stroke-opacity=".3" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M17 13c3-3 11-3 14 0-3 3-11 3-14 0z" fill="#3f8a34"/><path d="M24 11c0-2 1-4 3-5" stroke="#3f8a34" stroke-width="2.5" fill="none" stroke-linecap="round"/>` },
+    feslegen: { bg: '#dcefd2', svg: `<path d="M24 42V22" stroke="#2f7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M24 24c-10 0-14-6-14-12 8 0 14 4 14 12z" fill="#43a047"/><path d="M24 24c10 0 14-6 14-12-8 0-14 4-14 12z" fill="#56b34f"/><path d="M24 36c-8 0-11-5-11-9 6 0 11 3 11 9z" fill="#3b9440"/><path d="M24 36c8 0 11-5 11-9-6 0-11 3-11 9z" fill="#4aa84a"/>` },
+    marul: { bg: '#e4f2cf', svg: `<ellipse cx="24" cy="28" rx="16" ry="12" fill="#8fc65a"/><ellipse cx="16" cy="25" rx="8" ry="10" fill="#a6d56d" transform="rotate(-20 16 25)"/><ellipse cx="32" cy="25" rx="8" ry="10" fill="#a6d56d" transform="rotate(20 32 25)"/><ellipse cx="24" cy="22" rx="8" ry="10" fill="#c3e68c"/><path d="M24 14v16M18 20l6 6 6-6" stroke="#7fb24a" stroke-width="1.5" fill="none" stroke-linecap="round"/>` },
+    salatalik: { bg: '#dcefd2', svg: `<g transform="rotate(-35 24 24)"><rect x="6" y="16" width="36" height="16" rx="8" fill="#3f8a3a"/><rect x="6" y="16" width="36" height="6" rx="3" fill="#5aa84f" opacity=".6"/><circle cx="15" cy="24" r="1" fill="#cfe8bf"/><circle cx="22" cy="27" r="1" fill="#cfe8bf"/><circle cx="29" cy="23" r="1" fill="#cfe8bf"/><circle cx="35" cy="27" r="1" fill="#cfe8bf"/></g>` },
+    kabak: { bg: '#f6edc6', svg: `<g transform="rotate(-30 24 26)"><rect x="8" y="17" width="32" height="18" rx="9" fill="#9bb83b"/><rect x="8" y="17" width="32" height="7" rx="3.5" fill="#bdd35a" opacity=".6"/></g><path d="M37 15l3-5" stroke="#6a8a2a" stroke-width="3" stroke-linecap="round"/>` },
+    maydanoz: { bg: '#d6ebcb', svg: `<path d="M24 44V28" stroke="#2f7a2a" stroke-width="2.5" stroke-linecap="round"/><g fill="#2e8b3e"><circle cx="24" cy="14" r="5"/><circle cx="18" cy="19" r="5"/><circle cx="30" cy="19" r="5"/><circle cx="24" cy="21" r="5"/></g><g fill="#3fa14c"><circle cx="13" cy="28" r="4.5"/><circle cx="19" cy="31" r="4.5"/><circle cx="35" cy="28" r="4.5"/><circle cx="29" cy="31" r="4.5"/></g>` },
+    nane: { bg: '#d9f0e2', svg: `<path d="M24 42V10" stroke="#2f8a55" stroke-width="2.5" stroke-linecap="round"/><g fill="#38a869"><ellipse cx="17" cy="16" rx="7" ry="4" transform="rotate(-30 17 16)"/><ellipse cx="31" cy="16" rx="7" ry="4" transform="rotate(30 31 16)"/><ellipse cx="16" cy="26" rx="8" ry="4.5" transform="rotate(-25 16 26)"/><ellipse cx="32" cy="26" rx="8" ry="4.5" transform="rotate(25 32 26)"/></g><g fill="#4fbf80"><ellipse cx="17" cy="36" rx="8" ry="4.5" transform="rotate(-20 17 36)"/><ellipse cx="31" cy="36" rx="8" ry="4.5" transform="rotate(20 31 36)"/></g><ellipse cx="24" cy="9" rx="3" ry="4.5" fill="#38a869"/>` },
+    kekik: { bg: '#e3ebd6', svg: `<g stroke="#6b7f3a" stroke-width="2" stroke-linecap="round" fill="none"><path d="M24 42V12"/><path d="M24 34l-10-8M24 28l11-9M24 22l-8-8"/></g><g fill="#7f9a45"><circle cx="14" cy="25" r="3"/><circle cx="35" cy="18" r="3"/><circle cx="16" cy="13" r="3"/><circle cx="24" cy="10" r="3"/><circle cx="20" cy="30" r="2.5"/><circle cx="29" cy="26" r="2.5"/></g><g fill="#b49ad8"><circle cx="24" cy="10" r="1.6"/><circle cx="35" cy="18" r="1.6"/></g>` },
+    roka: { bg: '#dcefd2', svg: `<path d="M24 42V28M24 42l-8-14M24 42l8-14" stroke="#2f7a2a" stroke-width="2" stroke-linecap="round"/><g fill="#3c8f3a"><ellipse cx="24" cy="18" rx="5" ry="12"/><ellipse cx="14" cy="24" rx="4.5" ry="11" transform="rotate(-28 14 24)"/><ellipse cx="34" cy="24" rx="4.5" ry="11" transform="rotate(28 34 24)"/></g>` },
+    turp: { bg: '#fbe0e6', svg: `<g fill="#2f8a3a"><ellipse cx="18" cy="12" rx="4" ry="8" transform="rotate(-25 18 12)"/><ellipse cx="30" cy="12" rx="4" ry="8" transform="rotate(25 30 12)"/><ellipse cx="24" cy="10" rx="3.5" ry="8"/></g><circle cx="24" cy="29" r="13" fill="#d9366a"/><path d="M21 40q3 6 6 0z" fill="#f7ecef"/><path d="M24 42v4" stroke="#f7ecef" stroke-width="2" stroke-linecap="round"/><ellipse cx="19" cy="25" rx="3.5" ry="2.5" fill="#fff" opacity=".3" transform="rotate(-30 19 25)"/>` },
+    ispanak: { bg: '#d3e8d0', svg: `<path d="M24 44C8 38 6 20 24 6c18 14 16 32 0 38z" fill="#2c7d3a"/><path d="M24 44V14M24 30l-8-8M24 24l7-7" stroke="#6fbf7a" stroke-width="1.8" fill="none" stroke-linecap="round"/>` },
+    dereotu: { bg: '#e3f0d0', svg: `<path d="M24 44V10" stroke="#4a9a3a" stroke-width="2" stroke-linecap="round"/><g stroke="#5db04a" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M24 14l-8-4M24 14l8-4M24 20l-11-4M24 20l11-4M24 26l-12-3M24 26l12-3M24 32l-11-2M24 32l11-2M24 38l-8-1M24 38l8-1"/></g><g fill="#a8d45a"><circle cx="16" cy="10" r="1.5"/><circle cx="32" cy="10" r="1.5"/><circle cx="13" cy="16" r="1.5"/><circle cx="35" cy="16" r="1.5"/></g>` },
+    fasulye: { bg: '#e0efcf', svg: `<path d="M10 34C8 24 20 10 36 8c3 0 4 3 2 5C28 20 22 30 16 38c-3 3-6 0-6-4z" fill="#4aa03e"/><g fill="#78c466"><circle cx="19" cy="26" r="3"/><circle cx="25" cy="20" r="3"/><circle cx="31" cy="15" r="2.8"/></g><path d="M36 8l4-3" stroke="#2f7a2a" stroke-width="2.5" stroke-linecap="round"/>` },
+    havuc: { bg: '#fbe6cf', svg: `<path d="M16 16c4-3 12-3 16 0-1 10-6 22-8 28-2-6-7-18-8-28z" fill="#ec8a1e"/><path d="M19 22h5M25 29h5M22 35h4" stroke="#c46a0f" stroke-width="1.5" stroke-linecap="round"/><g fill="#3d9a3a"><ellipse cx="19" cy="10" rx="3" ry="7" transform="rotate(-18 19 10)"/><ellipse cx="29" cy="10" rx="3" ry="7" transform="rotate(18 29 10)"/><ellipse cx="24" cy="8" rx="3" ry="8"/></g>` }
+  };
+  var DROP = '<span class="drop" title="Sulama zamanı"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1C4 4 2.5 5.5 2.5 7.5a3.5 3.5 0 007 0C9.5 5.5 8 4 6 1z" fill="#fff"/></svg></span>';
+  function tile(k, extra) {
+    return '<span class="tile" style="background:' + ICONS[k].bg + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + ICONS[k].svg + '</svg>' + (extra || '') + '</span>';
+  }
+  function stage(s, day) {
+    var cut = s.t ? s.t : Math.round(s.h * 0.5);
+    if (day <= s.g) return 'Tohum toprakta';
+    if (day <= cut) return 'Filiz';
+    if (day < s.h * 0.85) return 'Gelişiyor';
+    if (day < s.h) return 'Hasada yakın';
+    return 'Hasat zamanı';
+  }
+  var SPROUT = '<span class="sprout" style="left:__L__%"><svg viewBox="0 0 20 20" aria-hidden="true"><circle class="bg" cx="10" cy="10" r="10"/><path class="lf" d="M6 14c0-5 3-8 8-8 0 5-3 8-8 8z"/></svg></span>';
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function starSvg(on, i) {
+    return '<svg class="star' + (on ? ' on' : '') + '" viewBox="0 0 24 24" aria-hidden="true"' + (i != null ? ' style="--i:' + i + '"' : '') + '><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.2 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+  }
+  function starsHtml(n) {
+    var h = '';
+    for (var i = 0; i < 5; i++) h += starSvg(i < n);
+    return '<span class="stars" role="img" aria-label="5 üzerinden ' + n + ' yıldız">' + h + '</span>';
+  }
+  function actionsHtml(p, s, day, due) {
+    if (p.harvested) return '';
+    var ready = day >= Math.ceil(s.h * 0.85);
+    return '<div class="card-actions"><button class="btn small ' + (due ? 'primary' : '') + '" type="button" data-action="water">Sulandı</button>' +
+      (ready ? '<button class="btn small ' + (day >= s.h ? 'primary' : '') + '" type="button" data-action="harvest">Hasat ettim</button>' : '') + '</div>';
+  }
+  var KEY = 'topraktan.v2', OLDKEY = 'topraktan.v1', PKEY = 'topraktan.profile.v1';
+
+  var now = new Date();
+  var todayMs = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  function parse(s) { var p = s.split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); }
+  function iso(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  function addDays(s, k) { return iso(parse(s) + k * DAY); }
+  function diff(s) { return Math.round((parse(s) - todayMs) / DAY); }
+  function nice(s) { return new Date(parse(s)).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', timeZone: 'UTC' }); }
+  function when(k) { return k === 0 ? 'bugün' : k === 1 ? 'yarın' : k + ' gün sonra'; }
+  function uid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function readyExample() {
+    return { id: uid(), key: 'turp', sow: addDays(iso(todayMs), -28), watered: addDays(iso(todayMs), -1), late: 2, example: true };
+  }
+  function seed() {
+    return [
+      { id: uid(), key: 'domates',  sow: addDays(iso(todayMs), -20), watered: addDays(iso(todayMs), -3), example: true },
+      { id: uid(), key: 'biber',    sow: addDays(iso(todayMs), -48), watered: addDays(iso(todayMs), -1), example: true },
+      { id: uid(), key: 'feslegen', sow: addDays(iso(todayMs), -9),  watered: addDays(iso(todayMs), -1), example: true },
+      { id: uid(), key: 'marul',    sow: addDays(iso(todayMs), -3),  watered: addDays(iso(todayMs), -1), example: true },
+      readyExample()
+    ];
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) { var a = JSON.parse(raw); if (Array.isArray(a)) return a; }
+      var old = localStorage.getItem(OLDKEY);
+      if (old) { var b = JSON.parse(old); if (Array.isArray(b)) { b.push(readyExample()); return b; } }
+    } catch (e) {}
+    return seed();
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(plants)); } catch (e) {} }
+
+  var plants = load();
+  var profile = (function () {
+    try {
+      var r = JSON.parse(localStorage.getItem(PKEY));
+      if (r && typeof r === 'object') return { name: String(r.name || '').slice(0, 20), stars: Number(r.stars) || 0, harvests: Number(r.harvests) || 0 };
+    } catch (e) {}
+    return { name: '', stars: 0, harvests: 0 };
+  })();
+  function saveProfile() { try { localStorage.setItem(PKEY, JSON.stringify(profile)); } catch (e) {} }
+  var openId = null;
+  var confirmId = null;
+
+  function nextTask(p) {
+    var s = PLANTS[p.key];
+    if (p.harvested) return { tone: 'ok', due: false, sort: 1000, text: 'Hasat edildi: ' + nice(p.harvested.date) };
+    var wd = diff(addDays(p.watered, s.w));
+    if (wd <= 0) return { tone: 'warn', due: true, sort: -100 + wd, text: wd < 0 ? 'Sulama ' + (-wd) + ' gün gecikti' : 'Bugün sula' };
+    var ms = [];
+    [['Çimlenme', s.g], ['Fidan dikme', s.t], ['İlk hasat', s.h]].forEach(function (m) {
+      if (m[1] == null) return;
+      var k = diff(addDays(p.sow, m[1]));
+      if (k >= 0) ms.push({ l: m[0], k: k });
+    });
+    ms.sort(function (a, b) { return a.k - b.k; });
+    var m = ms[0];
+    if (!m) return { tone: 'ok', due: false, sort: 500, text: 'Hasat zamanı geçti, topla' };
+    if (m.k <= wd) return { tone: m.k === 0 ? 'ok' : 'plain', due: false, sort: m.k, text: m.l + ' ' + when(m.k) };
+    return { tone: 'plain', due: false, sort: wd, text: 'Sulama ' + when(wd) };
+  }
+
+  function render() {
+    var list = document.getElementById('list');
+    document.getElementById('today-date').textContent = new Date(todayMs).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+
+    var rows = plants.map(function (p) { return { p: p, t: nextTask(p) }; });
+    rows.sort(function (a, b) { return a.t.sort - b.t.sort; });
+    var dueN = rows.filter(function (r) { return r.t.due; }).length;
+    var line = document.getElementById('today-line');
+    if (!plants.length) line.textContent = 'Henüz bir şey ekmedin.';
+    else if (dueN) line.textContent = dueN === 1 ? 'Bugün 1 bitki susamış.' : 'Bugün ' + dueN + ' bitki susamış.';
+    else line.textContent = 'Bugün sulanacak bitki yok.';
+
+    if (!plants.length) {
+      list.innerHTML = '<div class="empty"><strong>Toprak boş</strong>İlk tohumunu eklemek için sağ üstteki düğmeye dokun.</div>';
+      return;
+    }
+
+    list.innerHTML = rows.map(function (r) {
+      var p = r.p, t = r.t, s = PLANTS[p.key];
+      var day = Math.max(1, -diff(p.sow) + 1);
+      var pct = p.harvested ? 100 : Math.min(100, Math.round(day / s.h * 100));
+      var ticks = '<span class="tick" style="left:' + Math.round(s.g / s.h * 100) + '%"></span>';
+      if (s.t) ticks += '<span class="tick" style="left:' + Math.round(s.t / s.h * 100) + '%"></span>';
+      var open = openId === p.id;
+      var due = t.due;
+      var html = '<article class="card" data-id="' + p.id + '">' +
+        '<button class="card-head" type="button" data-action="toggle" aria-expanded="' + open + '">' +
+          '<span class="head-top">' + tile(p.key, t.due ? DROP : '') +
+            '<span class="ptext"><span class="pname">' + s.n + (p.example ? '<span class="ex">örnek</span>' : '') + '</span><span class="stage">' + (p.harvested ? 'Hasat edildi ' + starsHtml(p.harvested.stars) : stage(s, day)) + '</span></span>' +
+            '<span class="pday">' + day + '. gün</span></span>' +
+          '<span class="track" role="img" aria-label="Hasada ' + pct + ' yüzde"><span class="fill" style="width:' + pct + '%"></span>' + ticks + SPROUT.replace('__L__', Math.min(96, Math.max(4, pct))) + '</span>' +
+          '<span class="next ' + t.tone + '"><span class="dot"></span>' + t.text + '</span>' +
+        '</button>' +
+        actionsHtml(p, s, day, due);
+      if (open) {
+        var steps = [['Ekim', 0]].concat([['Çimlenme', s.g]]);
+        if (s.t) steps.push(['Fidan dikme', s.t]);
+        steps.push(['İlk hasat', s.h]);
+        html += '<div class="details"><ul class="steps">' + steps.map(function (st) {
+          var d = addDays(p.sow, st[1]), k = diff(d);
+          var tag = k < 0 ? 'geçti' : k === 0 ? 'bugün' : k + ' gün kaldı';
+          return '<li class="' + (k < 0 ? 'done' : '') + '"><span class="sname">' + st[0] + '</span><span class="sdate">' + nice(d) + ' · ' + tag + '</span></li>';
+        }).join('') + '</ul>' +
+        '<p class="meta">Son sulama: ' + nice(p.watered) + '. ' + s.n + ' için ' + s.w + ' günde bir sulama önerilir. Şimdiye kadar toplam ' + (p.late || 0) + ' gün gecikme.</p>' +
+        '<div class="panel-actions">' + (confirmId === p.id
+          ? '<button class="btn small danger" type="button" data-action="delete-yes">Evet, sil</button><button class="btn small" type="button" data-action="delete-no">Vazgeç</button>'
+          : '<button class="btn small danger" type="button" data-action="delete">Sil</button>') +
+        '</div></div>';
+      }
+      return html + '</article>';
+    }).join('');
+  }
+
+  var picker = document.getElementById('picker');
+  var sel = { value: 'domates' };
+  function drawPicker() {
+    picker.innerHTML = Object.keys(PLANTS).map(function (k) {
+      return '<button type="button" class="pick" role="radio" aria-checked="' + (sel.value === k) + '" data-key="' + k + '">' + tile(k) + '<span>' + PLANTS[k].n + '</span></button>';
+    }).join('');
+  }
+  drawPicker();
+  var dateEl = document.getElementById('sow-date');
+  dateEl.max = iso(todayMs);
+  if (!dateEl.value) dateEl.value = iso(todayMs);
+  function hint() {
+    var s = PLANTS[sel.value];
+    document.getElementById('plant-hint').textContent = 'Yaklaşık ' + s.g + ' günde çimlenir, ' + (s.t ? s.t + '. günde fidan olarak dikilir, ' : 'doğrudan toprağa ekilir, ') + s.h + '. günde ilk hasat gelir.';
+  }
+  picker.addEventListener('click', function (e) {
+    var b = e.target.closest('.pick');
+    if (!b) return;
+    sel.value = b.getAttribute('data-key');
+    drawPicker();
+    hint();
+    var nb = picker.querySelector('[data-key="' + sel.value + '"]');
+    if (nb) nb.focus();
+  });
+  hint();
+
+  var addPanel = document.getElementById('add-panel');
+  var toggleBtn = document.getElementById('toggle-add');
+  function setAdd(on) {
+    addPanel.hidden = !on;
+    toggleBtn.setAttribute('aria-expanded', String(on));
+    if (on) { var f = picker.querySelector('.pick'); if (f) f.focus(); }
+  }
+  toggleBtn.addEventListener('click', function () { setAdd(addPanel.hidden); });
+  document.getElementById('add-cancel').addEventListener('click', function () { setAdd(false); });
+  document.getElementById('add-confirm').addEventListener('click', function () {
+    var sow = dateEl.value || iso(todayMs);
+    if (parse(sow) > todayMs) sow = iso(todayMs);
+    var p = { id: uid(), key: sel.value, sow: sow, watered: sow };
+    plants.push(p);
+    openId = p.id;
+    save();
+    setAdd(false);
+    render();
+  });
+
+  document.getElementById('list').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var card = btn.closest('.card');
+    var id = card.getAttribute('data-id');
+    var a = btn.getAttribute('data-action');
+    if (a === 'toggle') { openId = openId === id ? null : id; confirmId = null; }
+    else if (a === 'water') {
+      plants.forEach(function (p) {
+        if (p.id !== id || p.harvested) return;
+        var wd = diff(addDays(p.watered, PLANTS[p.key].w));
+        if (wd < 0) p.late = (p.late || 0) + (-wd);
+        p.watered = iso(todayMs);
+      });
+      save();
+    }
+    else if (a === 'harvest') { doHarvest(id); return; }
+    else if (a === 'delete') { confirmId = id; }
+    else if (a === 'delete-no') { confirmId = null; }
+    else if (a === 'delete-yes') {
+      plants = plants.filter(function (p) { return p.id !== id; });
+      openId = null; confirmId = null;
+      save();
+    }
+    render();
+  });
+
+  /* ---- Çiftçi adı ---- */
+  var chip = document.getElementById('farmer-chip');
+  var fpanel = document.getElementById('farmer-panel');
+  var finput = document.getElementById('farmer-input');
+  var fcancel = document.getElementById('farmer-cancel');
+  function updateChip() {
+    if (!profile.name) { chip.hidden = true; fpanel.hidden = false; fcancel.hidden = true; return; }
+    chip.hidden = false;
+    chip.innerHTML = '<span class="cname"></span><span class="cstars">' + starSvg(true) + profile.stars + '</span>';
+    chip.querySelector('.cname').textContent = 'Çiftçi ' + profile.name;
+  }
+  function saveFarmer() {
+    var n = finput.value.trim().slice(0, 20);
+    if (!n) { finput.focus(); return; }
+    profile.name = n;
+    saveProfile();
+    fpanel.hidden = true;
+    updateChip();
+    renderLeague();
+    queuePush();
+  }
+  document.getElementById('farmer-save').addEventListener('click', saveFarmer);
+  finput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveFarmer(); } });
+  fcancel.addEventListener('click', function () { fpanel.hidden = true; });
+  chip.addEventListener('click', function () {
+    finput.value = profile.name;
+    fcancel.hidden = false;
+    fpanel.hidden = false;
+    finput.focus();
+  });
+
+  /* ---- Lig: arkadaş kodları ---- */
+  var FKEY = 'topraktan.friends.v1';
+  var friends = (function () {
+    try {
+      var a = JSON.parse(localStorage.getItem(FKEY));
+      if (Array.isArray(a)) return a.filter(function (f) { return f && typeof f.name === 'string' && f.name; }).map(function (f) {
+        return { name: f.name.slice(0, 20), stars: Number(f.stars) || 0, harvests: Number(f.harvests) || 0 };
+      });
+    } catch (e) {}
+    return [];
+  })();
+  function saveFriends() { try { localStorage.setItem(FKEY, JSON.stringify(friends)); } catch (e) {} }
+  var msgEl = document.getElementById('share-msg');
+  function say(t) { msgEl.textContent = t; }
+  function myCode() { return 'Topraktan|' + profile.name.replace(/\|/g, '') + '|' + profile.stars + '|' + profile.harvests; }
+  function updateMyCode() {
+    var el = document.getElementById('my-code');
+    el.value = profile.name ? myCode() : '';
+    el.placeholder = profile.name ? '' : 'Önce çiftçi adını yaz';
+  }
+  function queuePush() { updateMyCode(); }
+  function leagueRows() {
+    var rows = friends.map(function (f) { return { name: f.name, stars: f.stars, harvests: f.harvests, me: false }; });
+    if (profile.name) rows.push({ name: profile.name, stars: profile.stars, harvests: profile.harvests, me: true });
+    rows.sort(function (a, b) { return (b.stars - a.stars) || (b.harvests - a.harvests) || a.name.localeCompare(b.name, 'tr'); });
+    return rows;
+  }
+  function renderLeague() {
+    var ol = document.getElementById('league-list');
+    var rows = leagueRows();
+    ol.innerHTML = rows.length ? rows.map(function (r, i) {
+      return '<li class="lg-row' + (r.me ? ' me' : '') + '"><span class="lg-rank">' + (i + 1) + '</span><span class="lg-name">' + esc(r.name) + (r.me ? '<span class="ex">sen</span>' : '') + '</span><span class="lg-score">' + starSvg(true) + r.stars + '<small>' + r.harvests + ' hasat</small></span>' +
+        (r.me ? '' : '<button class="lg-x" type="button" data-name="' + esc(r.name) + '" aria-label="' + esc(r.name) + ' arkadaşını listeden çıkar">×</button>') + '</li>';
+    }).join('') : '<li class="lg-empty">Henüz arkadaşın yok. Kodunu gönder, arkadaşının kodunu ekle.</li>';
+  }
+  document.getElementById('league-list').addEventListener('click', function (e) {
+    var b = e.target.closest('.lg-x');
+    if (!b) return;
+    var n = b.getAttribute('data-name');
+    friends = friends.filter(function (f) { return f.name !== n; });
+    saveFriends(); renderLeague(); say(n + ' listeden çıkarıldı.');
+  });
+  function copyFallback(el) {
+    try { el.focus(); el.select(); el.setSelectionRange(0, 999); if (document.execCommand && document.execCommand('copy')) { say('Kod kopyalandı. Şimdi arkadaşına gönder.'); return; } } catch (e) {}
+    say('Kod seçildi. Basılı tutup "Kopyala"yı seç.');
+  }
+  document.getElementById('copy-code').addEventListener('click', function () {
+    var el = document.getElementById('my-code');
+    if (!profile.name) { say('Önce çiftçi adını yaz.'); return; }
+    updateMyCode();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(el.value).then(function () { say('Kod kopyalandı. Şimdi arkadaşına gönder.'); }, function () { copyFallback(el); });
+    } else copyFallback(el);
+  });
+  function addFriend() {
+    var fin = document.getElementById('friend-code');
+    var m = fin.value.match(/Topraktan\|([^|\n]{1,20})\|(\d{1,5})\|(\d{1,5})/);
+    if (!m) { say('Bu kod tanınmadı. Arkadaşının kodunu olduğu gibi yapıştır.'); return; }
+    var name = m[1].trim(), stars = parseInt(m[2], 10), hv = parseInt(m[3], 10);
+    if (!name) { say('Bu kod tanınmadı. Arkadaşının kodunu olduğu gibi yapıştır.'); return; }
+    if (profile.name && name.toLowerCase() === profile.name.toLowerCase()) { say('Bu senin kendi kodun. Arkadaşının kodunu yapıştır.'); return; }
+    var f = friends.filter(function (x) { return x.name.toLowerCase() === name.toLowerCase(); })[0];
+    if (f) { f.stars = Math.max(f.stars, stars); f.harvests = Math.max(f.harvests, hv); }
+    else friends.push({ name: name, stars: stars, harvests: hv });
+    saveFriends(); renderLeague();
+    fin.value = '';
+    say(name + ' listeye eklendi!');
+  }
+  document.getElementById('add-friend').addEventListener('click', addFriend);
+  document.getElementById('friend-code').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addFriend(); } });
+
+  /* ---- Hasat ve kutlama ---- */
+  var celEl = document.getElementById('celebrate');
+  var celClose = document.getElementById('cel-close');
+  var lastFocus = null;
+  function confetti() {
+    var cv = document.getElementById('confetti');
+    if (!cv || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var ctx = cv.getContext('2d');
+    var w = cv.width = window.innerWidth, h = cv.height = window.innerHeight;
+    var cols = ['#f2c24f', '#8cc66b', '#e8734a', '#f6f3e4', '#6fb7d9'];
+    var ps = [];
+    for (var i = 0; i < 140; i++) ps.push({ x: Math.random() * w, y: -20 - Math.random() * h * 0.6, r: 4 + Math.random() * 5, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 3.5, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: cols[i % cols.length] });
+    var t0 = performance.now();
+    (function frame(t) {
+      ctx.clearRect(0, 0, w, h);
+      var alive = 0;
+      ps.forEach(function (p) {
+        p.x += p.vx + Math.sin(p.y / 40); p.y += p.vy; p.rot += p.vr;
+        if (p.y < h + 20) alive++;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); ctx.restore();
+      });
+      if (alive && t - t0 < 6000 && !celEl.hidden) requestAnimationFrame(frame); else ctx.clearRect(0, 0, w, h);
+    })(t0);
+  }
+  function celebrate(p, s, st, counted, first) {
+    var ic = ICONS[p.key];
+    var tileEl = document.getElementById('cel-tile');
+    tileEl.style.background = ic.bg;
+    tileEl.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true">' + ic.svg + '</svg>';
+    document.getElementById('cel-kicker').textContent = first ? 'İlk hasadın!' : s.n + ' hasadı tamam';
+    document.getElementById('cel-title').textContent = 'Tebrikler, ' + profile.name + '!';
+    var h = '';
+    for (var i = 0; i < 5; i++) h += starSvg(i < st, i);
+    var starsEl = document.getElementById('cel-stars');
+    starsEl.innerHTML = h;
+    starsEl.setAttribute('aria-label', '5 üzerinden ' + st + ' yıldız');
+    document.getElementById('cel-label').textContent = ['', 'Bir dahaki sefere daha iyisi', 'Gelişmeye açık', 'İyi gidiyorsun', 'Yeşil parmak', 'Usta çiftçi'][st];
+    document.getElementById('cel-score').textContent = counted
+      ? s.n + ' için ' + st + ' yıldız kazandın. Toplam puanın: ' + profile.stars + ' yıldız.'
+      : 'Bu örnek bir bitkiydi, puana sayılmadı. Kendi ektiğin bitkilerle puan topla.';
+    var rank = '';
+    if (counted) {
+      var rows = leagueRows();
+      for (var k = 0; k < rows.length; k++) if (rows[k].me && rows.length > 1) rank = 'Ligde şu an ' + (k + 1) + '. sıradasın.';
+    }
+    document.getElementById('cel-rank').textContent = rank;
+    lastFocus = document.activeElement;
+    celEl.hidden = false;
+    celClose.focus();
+    confetti();
+  }
+  function closeCel() {
+    celEl.hidden = true;
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+  }
+  celClose.addEventListener('click', closeCel);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !celEl.hidden) closeCel(); });
+
+  function doHarvest(id) {
+    var p = plants.filter(function (x) { return x.id === id; })[0];
+    if (!p || p.harvested) return;
+    if (!profile.name) {
+      fpanel.hidden = false;
+      finput.focus();
+      fpanel.scrollIntoView({ block: 'center' });
+      return;
+    }
+    var s = PLANTS[p.key];
+    var late = (p.late || 0) + Math.max(0, -diff(addDays(p.watered, s.w)));
+    var st = late <= 1 ? 5 : late <= 3 ? 4 : late <= 6 ? 3 : late <= 10 ? 2 : 1;
+    var counted = !p.example;
+    var first = counted && profile.harvests === 0;
+    p.late = late;
+    p.harvested = { date: iso(todayMs), stars: st };
+    if (counted) { profile.stars += st; profile.harvests += 1; saveProfile(); queuePush(); }
+    save();
+    updateChip();
+    renderLeague();
+    render();
+    celebrate(p, s, st, counted, first);
+  }
+
+  render();
+  updateChip();
+  updateMyCode();
+  renderLeague();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }
+</script>
+</body>
+</html>
